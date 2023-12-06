@@ -16,10 +16,7 @@ from sparse_autoencoder import (
     PreTokenizedDataset,
     SparseAutoencoder,
 )
-from sparse_autoencoder.train.sweep_config import (
-    RuntimeHyperparameters,
-    SweepConfig,
-)
+from sparse_autoencoder.train.sweep_config import RuntimeHyperparameters, SweepConfig
 
 
 def setup_activation_resampler(hyperparameters: RuntimeHyperparameters) -> ActivationResampler:

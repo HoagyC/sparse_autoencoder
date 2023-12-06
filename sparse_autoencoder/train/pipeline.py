@@ -1,6 +1,8 @@
 """Default pipeline."""
 from collections.abc import Iterable
+from datetime import datetime, timezone
 from functools import partial
+import os
 from pathlib import Path
 from typing import final
 from urllib.parse import quote_plus
@@ -121,7 +123,7 @@ class Pipeline:
         self.loss = loss
         self.metrics = metrics
         self.optimizer = optimizer
-        self.run_name = run_name
+        self.run_name = run_name + datetime.now(tz=timezone.utc).strftime("-%Y-%m-%d-%H-%M-%S")
         self.source_data_batch_size = source_data_batch_size
         self.source_dataset = source_dataset
         self.source_model = source_model
@@ -336,9 +338,17 @@ class Pipeline:
         """Save the model as a checkpoint."""
         if self.checkpoint_directory:
             run_name_file_system_safe = quote_plus(self.run_name)
+            run_directory = self.checkpoint_directory / run_name_file_system_safe
+            if not run_directory.exists():
+                run_directory.mkdir(parents=True)
+            if "config.json" not in os.listdir(run_directory):
+                with Path.open(run_directory / "config.json", "w") as config_file:
+                    config_file.write(wandb.config.as_json())
+
             file_path: Path = (
                 self.checkpoint_directory
-                / f"{run_name_file_system_safe}-{self.total_training_steps}.pt"
+                / run_name_file_system_safe
+                / "checkpoint-{self.total_training_steps}steps.pt"
             )
             torch.save(self.autoencoder.state_dict(), file_path)
 

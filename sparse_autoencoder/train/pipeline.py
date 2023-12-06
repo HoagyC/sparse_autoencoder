@@ -349,7 +349,7 @@ class Pipeline:
             file_path: Path = (
                 self.checkpoint_directory
                 / run_name_file_system_safe
-                / "checkpoint-{self.total_training_steps}steps.pt"
+                / f"checkpoint-{self.total_training_steps}steps.pt"
             )
             torch.save(self.autoencoder.state_dict(), file_path)
 

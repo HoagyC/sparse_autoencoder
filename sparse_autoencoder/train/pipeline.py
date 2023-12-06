@@ -2,6 +2,7 @@
 from collections.abc import Iterable
 from datetime import datetime, timezone
 from functools import partial
+from json import dumps
 import os
 from pathlib import Path
 from typing import final
@@ -343,7 +344,7 @@ class Pipeline:
                 run_directory.mkdir(parents=True)
             if "config.json" not in os.listdir(run_directory):
                 with Path.open(run_directory / "config.json", "w") as config_file:
-                    config_file.write(wandb.config.as_json())
+                    config_file.write(dumps(dict(wandb.config)))
 
             file_path: Path = (
                 self.checkpoint_directory

@@ -189,7 +189,7 @@ def run_training_pipeline(
     )
 
 
-def sweep(sweep_config: SweepConfig | None, sweep_id: str | None) -> None:
+def sweep(sweep_config: SweepConfig | None, sweep_id: str | None = None) -> None:
     """Main function to run the training pipeline with wandb hyperparameter sweep."""
     if sweep_id is None:
         if sweep_config is None:

@@ -189,9 +189,13 @@ def run_training_pipeline(
     )
 
 
-def sweep(sweep_config: SweepConfig) -> None:
+def sweep(sweep_config: SweepConfig | None, sweep_id: str | None) -> None:
     """Main function to run the training pipeline with wandb hyperparameter sweep."""
-    sweep_id = wandb.sweep(sweep_config.to_dict(), project="sparse-autoencoder")
+    if sweep_id is None:
+        if sweep_config is None:
+            err_str = "Must provide sweep_config or sweep_id"
+            raise ValueError(err_str)
+        sweep_id = wandb.sweep(sweep_config.to_dict(), project="sparse-autoencoder")
 
     def train() -> None:
         """Train the sparse autoencoder using the hyperparameters from the WandB sweep."""

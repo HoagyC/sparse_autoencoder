@@ -373,29 +373,8 @@ class Pipeline:
             return None
 
     @final
-<<<<<<< HEAD
     def save_checkpoint(self, *, is_final: bool = False) -> Path:
         """Save the model as a checkpoint.
-=======
-    def save_checkpoint(self) -> None:
-        """Save the model as a checkpoint."""
-        if self.checkpoint_directory:
-            run_name_file_system_safe = quote_plus(self.run_name)
-            run_directory = self.checkpoint_directory / run_name_file_system_safe
-            if not run_directory.exists():
-                run_directory.mkdir(parents=True)
-            if "config.json" not in os.listdir(run_directory):
-                config_dict = dict(wandb.config)
-
-                git_hash = self.get_git_commit_hash()
-                config_dict["git_hash"] = git_hash
-
-                package_version = self.get_package_version()
-                config_dict["package_version"] = package_version
-
-                with Path.open(run_directory / "config.json", "w") as config_file:
-                    config_file.write(dumps(config_dict, indent=4))
->>>>>>> c57117c (Use importlib.metadata to get version.)
 
         Args:
             is_final: Whether this is the final checkpoint.

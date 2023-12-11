@@ -64,11 +64,7 @@ class ModelReconstructionScore(AbstractValidationMetric):
         zero_ablate_loss_minus_reconstruction_loss: Float[Tensor, Axis.ITEMS] = (
             data.source_model_loss_with_zero_ablation - data.source_model_loss_with_reconstruction
         )
-        model_reconstruction_score_itemwise: Float[Tensor, Axis.ITEMS] = (
-            zero_ablate_loss_minus_reconstruction_loss / zero_ablate_loss_minus_default_loss
-        )
-        model_reconstruction_score: float = model_reconstruction_score_itemwise.mean().item()
-        model_reconstruction_score_average: float = (
+        model_reconstruction_score: float = (
             zero_ablate_loss_minus_reconstruction_loss.mean().item()
             / zero_ablate_loss_minus_default_loss.mean().item()
         )
@@ -87,5 +83,4 @@ class ModelReconstructionScore(AbstractValidationMetric):
             "validate/loss_with_reconstruction": validation_loss_with_reconstruction,
             "validate/loss_with_zero_ablation": validation_loss_with_zero_ablation,
             "validate/model_reconstruction_score": model_reconstruction_score,
-            "validate/model_reconstruction_score_average": model_reconstruction_score_average,
         }

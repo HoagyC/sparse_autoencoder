@@ -1,21 +1,23 @@
 """Default pipeline."""
-import os
-import tempfile
 from collections.abc import Iterable
 from datetime import datetime, timezone
 from functools import partial
 from json import dumps
+import os
 from pathlib import Path
+import subprocess
+import tempfile
 from typing import final
 from urllib.parse import quote_plus
+import warnings
 
-import torch
-import wandb
 from jaxtyping import Int, Int64
+import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformer_lens import HookedTransformer
+import wandb
 
 from sparse_autoencoder.activation_resampler.abstract_activation_resampler import (
     AbstractActivationResampler,
@@ -34,6 +36,7 @@ from sparse_autoencoder.source_model.store_activations_hook import store_activat
 from sparse_autoencoder.source_model.zero_ablate_hook import zero_ablate_hook
 from sparse_autoencoder.tensor_types import Axis
 from sparse_autoencoder.train.utils import get_model_device
+
 
 DEFAULT_CHECKPOINT_DIRECTORY: Path = Path(tempfile.gettempdir()) / "sparse_autoencoder"
 
@@ -343,6 +346,22 @@ class Pipeline:
             calculated = metric.calculate(validation_data)
             if wandb.run is not None:
                 wandb.log(data=calculated, commit=False)
+
+    @staticmethod
+    def get_git_commit_hash() -> None | str:
+        """Get the Git commit hash of the current directory."""
+        try:
+            return (
+                subprocess.check_output(["/usr/bin/git", "rev-parse", "HEAD"])  # noqa: S603
+                .decode("ascii")
+                .strip()
+            )
+        except subprocess.CalledProcessError:
+            # Handle the case where the directory is not a Git repository
+            warnings.warn(
+                "Directory is not a Git repository, not logging commit hash", stacklevel=1
+            )
+            return None
 
     @final
     def save_checkpoint(self, *, is_final: bool = False) -> Path:

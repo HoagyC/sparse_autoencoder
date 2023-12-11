@@ -1,18 +1,21 @@
 """Default pipeline."""
-from collections.abc import Iterable
-from functools import partial
-from pathlib import Path
+import os
 import tempfile
+from collections.abc import Iterable
+from datetime import datetime, timezone
+from functools import partial
+from json import dumps
+from pathlib import Path
 from typing import final
 from urllib.parse import quote_plus
 
-from jaxtyping import Int, Int64
 import torch
+import wandb
+from jaxtyping import Int, Int64
 from torch import Tensor
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformer_lens import HookedTransformer
-import wandb
 
 from sparse_autoencoder.activation_resampler.abstract_activation_resampler import (
     AbstractActivationResampler,
@@ -31,7 +34,6 @@ from sparse_autoencoder.source_model.store_activations_hook import store_activat
 from sparse_autoencoder.source_model.zero_ablate_hook import zero_ablate_hook
 from sparse_autoencoder.tensor_types import Axis
 from sparse_autoencoder.train.utils import get_model_device
-
 
 DEFAULT_CHECKPOINT_DIRECTORY: Path = Path(tempfile.gettempdir()) / "sparse_autoencoder"
 
@@ -125,7 +127,7 @@ class Pipeline:
         self.loss = loss
         self.metrics = metrics
         self.optimizer = optimizer
-        self.run_name = run_name
+        self.run_name = run_name + datetime.now(tz=timezone.utc).strftime("-%Y-%m-%d-%H-%M-%S")
         self.source_data_batch_size = source_data_batch_size
         self.source_dataset = source_dataset
         self.source_model = source_model
@@ -358,6 +360,9 @@ class Pipeline:
 
         # Save locally
         self.checkpoint_directory.mkdir(parents=True, exist_ok=True)
+        if "config.json" not in os.listdir(self.checkpoint_directory):
+            with Path.open(self.checkpoint_directory / "config.json", "w") as config_file:
+                config_file.write(dumps(dict(wandb.config)))
         file_path: Path = self.checkpoint_directory / f"{safe_name}.pt"
         torch.save(
             self.autoencoder.state_dict(),
